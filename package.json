@@ -1,6 +1,6 @@
 {
   "name": "opendock-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for the Opendock Neutron API",
   "type": "module",
   "main": "dist/index.js",
@@ -15,6 +15,7 @@
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "test": "vitest run",
+    "publish": "npm publish --access public",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
