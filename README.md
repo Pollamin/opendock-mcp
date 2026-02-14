@@ -20,15 +20,6 @@ An [MCP](https://modelcontextprotocol.io/) server that connects AI assistants (C
 - Node.js 18+
 - An Opendock account with API access
 
-## Setup
-
-```bash
-git clone https://github.com/Pollamin/opendock-mcp.git
-cd opendock-mcp
-npm install
-npm run build
-```
-
 ## Authentication
 
 The server supports two authentication methods:
@@ -60,8 +51,8 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "opendock": {
-      "command": "node",
-      "args": ["/absolute/path/to/opendock-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "opendock-mcp"],
       "env": {
         "OPENDOCK_USERNAME": "user@example.com",
         "OPENDOCK_PASSWORD": "your-password"
@@ -73,10 +64,8 @@ Add to your `claude_desktop_config.json`:
 
 ## Usage with Claude Code
 
-Add to your Claude Code MCP settings:
-
 ```bash
-claude mcp add opendock -- node /absolute/path/to/opendock-mcp/dist/index.js
+claude mcp add opendock -- npx -y opendock-mcp
 ```
 
 Set the required environment variables before launching Claude Code, or pass them in the MCP config.
@@ -87,7 +76,16 @@ Use the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) to te
 
 ```bash
 OPENDOCK_USERNAME=user@example.com OPENDOCK_PASSWORD=your-password \
-  npx @modelcontextprotocol/inspector node dist/index.js
+  npx @modelcontextprotocol/inspector npx -y opendock-mcp
+```
+
+## Development
+
+```bash
+git clone https://github.com/Pollamin/opendock-mcp.git
+cd opendock-mcp
+npm install
+npm run build
 ```
 
 ## License
