@@ -36,6 +36,7 @@ src/
 - **Zod schemas** — each tool defines its input schema inline with `z.string()`, `z.number()`, etc.
 - **Tool pattern** — each tool file exports a `register*Tools(server, api)` function that calls `server.tool()`
 - **API client pattern** — all tools call `api.request({ method, path, query, body })`, never `fetch` directly
+- **`jsonResponse` helper** — `tools/index.ts` exports `jsonResponse(data)` which wraps data as `{ content: [{ type: "text", text: JSON.stringify(data, null, 2) }] }`. All tool handlers use it for consistent MCP responses.
 - **Auth is lazy** — no network call until first tool invocation; token refreshes proactively 60s before expiry
 
 ## Adding a New Tool

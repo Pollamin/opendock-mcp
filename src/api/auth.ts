@@ -1,5 +1,7 @@
 import { Config } from "../config.js";
 
+const AUTH_TIMEOUT_MS = 30_000;
+
 export class AuthManager {
   private token: string | null = null;
   private config: Config;
@@ -65,6 +67,7 @@ export class AuthManager {
         email: this.config.username,
         password: this.config.password,
       }),
+      signal: AbortSignal.timeout(AUTH_TIMEOUT_MS),
     });
 
     if (!res.ok) {
@@ -81,6 +84,7 @@ export class AuthManager {
     const res = await fetch(`${this.config.apiUrl}/auth/refresh`, {
       method: "GET",
       headers: { Authorization: `Bearer ${currentToken}` },
+      signal: AbortSignal.timeout(AUTH_TIMEOUT_MS),
     });
 
     if (!res.ok) {
