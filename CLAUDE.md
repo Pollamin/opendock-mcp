@@ -46,6 +46,16 @@ src/
 3. If new file: export a `register*Tools` function and call it from `src/tools/index.ts`
 4. Run `npm run build` to verify
 
+## Testing
+
+```bash
+npm test          # vitest run — all tests
+```
+
+- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`
+- `tsconfig.json` excludes `src/**/*.test.ts` so tests don't end up in `dist/`
+- Mock `fetch` via `vi.stubGlobal`; use `vi.useFakeTimers()` for retry delay tests
+
 ## Publishing
 
 Published to npm as `opendock-mcp`. To publish a new version:
@@ -53,6 +63,8 @@ Published to npm as `opendock-mcp`. To publish a new version:
 1. Bump version in `package.json`
 2. `npm publish --access public` (requires npm login + OTP)
 3. `prepublishOnly` script auto-runs `npm run build` before publish
+
+**Do not** add a `"publish"` script to package.json — it's a reserved npm lifecycle hook that runs after every `npm publish`, causing recursive publishes.
 
 ## Environment Variables
 
