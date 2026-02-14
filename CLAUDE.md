@@ -45,6 +45,14 @@ src/
 3. If new file: export a `register*Tools` function and call it from `src/tools/index.ts`
 4. Run `npm run build` to verify
 
+## Publishing
+
+Published to npm as `opendock-mcp`. To publish a new version:
+
+1. Bump version in `package.json`
+2. `npm publish --access public` (requires npm login + OTP)
+3. `prepublishOnly` script auto-runs `npm run build` before publish
+
 ## Environment Variables
 
 - `OPENDOCK_API_URL` — API base URL (default: `https://neutron.opendock.com`)

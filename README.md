@@ -1,6 +1,22 @@
 # Opendock MCP Server
 
+[![npm version](https://img.shields.io/npm/v/opendock-mcp.svg)](https://www.npmjs.com/package/opendock-mcp)
+
 An [MCP](https://modelcontextprotocol.io/) server that connects AI assistants (Claude, etc.) to the [Opendock](https://www.opendock.com/) Neutron API for warehouse dock scheduling.
+
+## Install
+
+No clone or build needed — just use `npx`:
+
+```bash
+npx -y opendock-mcp
+```
+
+Or install globally:
+
+```bash
+npm install -g opendock-mcp
+```
 
 ## Tools
 
