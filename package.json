@@ -15,7 +15,6 @@
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "test": "vitest run",
-    "publish": "npm publish --access public",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
