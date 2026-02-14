@@ -1,5 +1,9 @@
 import { AuthManager } from "./auth.js";
 
+const REQUEST_TIMEOUT_MS = 30_000;
+const RETRY_DELAY_MS = 1_000;
+const RETRYABLE_STATUS_CODES = new Set([502, 503, 504]);
+
 export interface ApiRequestOptions {
   method?: string;
   path: string;
@@ -20,12 +24,25 @@ export class ApiClient {
     const response = await this.doRequest(opts);
 
     if (response.status === 401) {
+      console.error(`[opendock] Got 401 on ${opts.method || "GET"} ${opts.path}, retrying with fresh token`);
       this.auth.clearToken();
       const retry = await this.doRequest(opts);
       if (!retry.ok) {
         const body = await retry.text();
         throw new Error(`API error ${retry.status}: ${body}`);
       }
+      return (await retry.json()) as T;
+    }
+
+    if (RETRYABLE_STATUS_CODES.has(response.status)) {
+      console.error(`[opendock] Got ${response.status} on ${opts.method || "GET"} ${opts.path}, retrying in ${RETRY_DELAY_MS}ms`);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      const retry = await this.doRequest(opts);
+      if (!retry.ok) {
+        const body = await retry.text();
+        throw new Error(`API error ${retry.status}: ${body}`);
+      }
+      if (retry.status === 204) return undefined as T;
       return (await retry.json()) as T;
     }
 
@@ -62,6 +79,7 @@ export class ApiClient {
       method: opts.method || "GET",
       headers,
       body: opts.body ? JSON.stringify(opts.body) : undefined,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   }
 }

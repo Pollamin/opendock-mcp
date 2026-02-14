@@ -20,8 +20,8 @@ export class AuthManager {
       try {
         this.token = await this.refresh(this.token);
         return this.token;
-      } catch {
-        // refresh failed, fall through to login
+      } catch (err) {
+        console.error("[opendock] Token refresh failed, falling back to login:", (err as Error).message);
       }
     }
 
@@ -72,6 +72,7 @@ export class AuthManager {
       throw new Error(`Login failed (${res.status}): ${body}`);
     }
 
+    console.error("[opendock] Login successful");
     const data = (await res.json()) as { access_token: string };
     return data.access_token;
   }

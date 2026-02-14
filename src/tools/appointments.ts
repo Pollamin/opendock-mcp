@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api/client.js";
+import { jsonResponse } from "./index.js";
 
 export function registerAppointmentTools(server: McpServer, api: ApiClient) {
   server.tool(
@@ -20,7 +21,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         path: "/appointment",
         query: params as Record<string, string | number | undefined>,
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 
@@ -43,7 +44,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         path: "/search/appointments",
         body: params,
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 
@@ -55,7 +56,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
     },
     async ({ id }) => {
       const data = await api.request({ path: `/appointment/${id}` });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 
@@ -78,7 +79,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         path: "/appointment",
         body: params,
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 
@@ -102,7 +103,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         path: `/appointment/${id}`,
         body,
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 

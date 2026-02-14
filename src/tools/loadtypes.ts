@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api/client.js";
+import { jsonResponse } from "./index.js";
 
 export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
   server.tool(
@@ -16,7 +17,7 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
         path: "/loadtype",
         query: params as Record<string, string | number | undefined>,
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 
@@ -28,7 +29,7 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
     },
     async ({ id }) => {
       const data = await api.request({ path: `/loadtype/${id}` });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 
@@ -46,7 +47,7 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
         path: `/loadtype/${id}/get-availability`,
         body: { startDate, endDate },
       });
-      return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+      return jsonResponse(data);
     }
   );
 }

@@ -17,5 +17,11 @@ export function loadConfig(): Config {
     );
   }
 
+  if (token && username) {
+    console.error(
+      "[opendock] Warning: Both OPENDOCK_TOKEN and OPENDOCK_USERNAME are set. Using OPENDOCK_TOKEN."
+    );
+  }
+
   return { apiUrl, username, password, token };
 }
