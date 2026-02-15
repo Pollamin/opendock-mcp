@@ -58,7 +58,8 @@ OPENDOCK_TOKEN=your-jwt-token
 Optionally set the API URL (defaults to `https://neutron.opendock.com`):
 
 ```
-OPENDOCK_API_URL=https://neutron.opendock.com
+OPENDOCK_API_URL=https://neutron.opendock.com           # production (default)
+OPENDOCK_API_URL=https://neutron.staging.opendock.com    # staging
 ```
 
 ## Usage with Claude Desktop
