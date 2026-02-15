@@ -6,12 +6,12 @@
     "url": "https://github.com/Pollamin/opendock-mcp",
     "source": "github"
   },
-  "version": "3.4.0",
+  "version": "4.0.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "opendock-mcp",
-      "version": "3.4.0",
+      "version": "4.0.0",
       "transport": {
         "type": "stdio"
       }
