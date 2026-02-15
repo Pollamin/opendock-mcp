@@ -25,7 +25,8 @@ sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/g" server.json
 echo "Bumped to $NEW_VERSION"
 
 npm publish --access public --otp "$OTP"
-mcp-publisher login github
+# Should already be authed via --token <token>
+# mcp-publisher login github
 mcp-publisher publish
 
 # Commit and push the version bump
