@@ -90,17 +90,69 @@ describe("appointment tools", () => {
     });
   });
 
+  it("list_appointments passes join as array", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    await server.call("list_appointments", { join: ["user||email,companyId", "user.company||name"] });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: { s: undefined, join: ["user||email,companyId", "user.company||name"] },
+    });
+  });
+
+  it("list_appointments passes sort as array", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    await server.call("list_appointments", { sort: ["start,ASC", "status,DESC"] });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: { s: undefined, sort: ["start,ASC", "status,DESC"] },
+    });
+  });
+
+  it("list_appointments passes fields, offset, and cache", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    await server.call("list_appointments", { fields: "refNumber,start", offset: 20, cache: 0 });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: { fields: "refNumber,start", offset: 20, cache: 0, s: undefined },
+    });
+  });
+
   // --- search_appointments ---
 
-  it("search_appointments sends POST /search/appointments", async () => {
+  it("search_appointments sends POST with structured body", async () => {
     api.request.mockResolvedValueOnce({ results: [] });
-    const result = await server.call("search_appointments", { status: "Scheduled" });
+    const result = await server.call("search_appointments", { searchStr: "thing", statuses: ["Scheduled"] });
     expect(api.request).toHaveBeenCalledWith({
       method: "POST",
       path: "/search/appointments",
-      body: { status: "Scheduled" },
+      body: {
+        searchStr: "thing",
+        statuses: ["Scheduled"],
+        sort: { sortBy: "appointment.start", sortDesc: false },
+        pagination: { size: 10, from: 0 },
+      },
     });
     expect(JSON.parse(result.content[0].text)).toEqual({ results: [] });
+  });
+
+  it("search_appointments supports custom sort and pagination", async () => {
+    api.request.mockResolvedValueOnce({ results: [] });
+    await server.call("search_appointments", {
+      searchStr: "test",
+      sortBy: "appointment.status",
+      sortDesc: true,
+      size: 25,
+      from: 50,
+    });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "POST",
+      path: "/search/appointments",
+      body: {
+        searchStr: "test",
+        sort: { sortBy: "appointment.status", sortDesc: true },
+        pagination: { size: 25, from: 50 },
+      },
+    });
   });
 
   // --- get_appointment ---

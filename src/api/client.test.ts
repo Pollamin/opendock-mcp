@@ -247,6 +247,19 @@ describe("ApiClient", () => {
     await expect(client.request({ path: "/items" })).rejects.toThrow("fetch failed");
   });
 
+  it("appends array query params as repeated keys", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse([])));
+    const client = new ApiClient("https://api.test", auth as any);
+
+    await client.request({
+      path: "/items",
+      query: { join: ["user||email", "user.company||name"] as any },
+    });
+    const url = (fetch as any).mock.calls[0][0] as string;
+    expect(url).toContain("join=user%7C%7Cemail");
+    expect(url).toContain("join=user.company%7C%7Cname");
+  });
+
   it("strips trailing slashes from base URL", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse({})));
     const client = new ApiClient("https://api.test///", auth as any);

@@ -19,23 +19,51 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
   server.registerTool(
     "list_appointments",
     {
-      description: "List appointments with optional filters and pagination. Uses NestJSX/Crud search syntax.",
+      description: `List and search appointments using NestJSX/Crud query syntax. Supports advanced filtering, field selection, joins, and sorting.
+
+SEARCH (s=): JSON search with operators. When s= is provided, startDate/endDate/status/warehouseId/dockId convenience filters are ignored.
+  Operators: $eq, $ne, $gt, $lt, $gte, $lte, $cont, $contL (case-insensitive contains), $starts, $ends, $in, $notin, $between, $isnull, $notnull
+  Combinators: $and, $or
+  Examples:
+    Scheduled after a date: s='{"$and":[{"status":"Scheduled"},{"start":{"$gt":"2026-03-15T08:00:00.000-07:00"}}]}'
+    Changed since a date: s='{"lastChangedDateTime":{"$gt":"2026-03-15T08:00:00.000Z"}}'
+    Soft-deleted since a date: s='{"$and":[{"lastChangedDateTime":{"$gt":"2026-07-07T00:00:00.000Z"}},{"isActive":false}]}'
+    Has tag "Late": s='{"tags":{"$contL":"Late"}}'
+    Empty tags: s='{"tags":{"$or":{"$isnull":true,"$eq":"{}"}}}'
+
+JOIN: Fetch related data in a single request. Each join is a separate array element.
+  Examples:
+    Get carrier info: join=["user","user.company"]
+    Carrier email + company name only: join=["user||email,companyId","user.company||name"]
+
+FIELDS: Comma-separated list of fields to return.
+  Example: fields="refNumber,start,lastChangedDateTime,status"
+
+SORT: Each sort is "field,direction". Use array for multi-sort.
+  Examples: sort=["start,ASC"] or sort=["start,DESC","status,ASC"]`,
       inputSchema: {
         page: z.number().optional().describe("Page number"),
         limit: z.number().optional().describe("Items per page"),
-        warehouseId: z.string().optional().describe("Filter by warehouse ID"),
-        dockId: z.string().optional().describe("Filter by dock ID"),
-        status: z.string().optional().describe("Filter by status"),
-        startDate: z.string().optional().describe("Filter appointments starting on or after this date (YYYY-MM-DD)"),
-        endDate: z.string().optional().describe("Filter appointments starting on or before this date (YYYY-MM-DD)"),
-        s: z.string().optional().describe("Raw NestJSX/Crud search JSON (e.g. '{\"status\":\"Scheduled\",\"start\":{\"$gte\":\"2026-01-01T00:00:00.000Z\"}}')"),
+        offset: z.number().optional().describe("Number of records to skip"),
+        warehouseId: z.string().optional().describe("Filter by warehouse ID (convenience; ignored if s= is set)"),
+        dockId: z.string().optional().describe("Filter by dock ID (convenience; ignored if s= is set)"),
+        status: z.string().optional().describe("Filter by status (convenience; ignored if s= is set)"),
+        startDate: z.string().optional().describe("Appointments starting on or after this date, YYYY-MM-DD (convenience; ignored if s= is set)"),
+        endDate: z.string().optional().describe("Appointments starting on or before this date, YYYY-MM-DD (convenience; ignored if s= is set)"),
+        s: z.string().optional().describe("NestJSX/Crud search JSON — see description for operators and examples"),
+        fields: z.string().optional().describe("Comma-separated fields to return (e.g. 'refNumber,start,status')"),
+        join: z.array(z.string()).optional().describe("Relations to join, each as 'relation' or 'relation||field1,field2' (e.g. ['user||email,companyId','user.company||name'])"),
+        sort: z.array(z.string()).optional().describe("Sort directives, each as 'field,ASC' or 'field,DESC' (e.g. ['start,ASC'])"),
+        cache: z.number().optional().describe("Set to 0 to bypass cache"),
       },
     },
     async (params) => {
-      const { startDate, endDate, s, ...rest } = params;
+      const { startDate, endDate, s, join, sort, ...rest } = params;
       const query: QueryParams = { ...rest };
-      // Raw s= takes precedence; otherwise build from startDate/endDate
+      // Raw s= takes precedence; otherwise build from convenience filters
       query.s = s ?? buildDateSearch(startDate, endDate);
+      if (join) query.join = join;
+      if (sort) query.sort = sort;
       const data = await api.request({ path: "/appointment", query });
       return jsonResponse(data);
     }
@@ -44,23 +72,33 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
   server.registerTool(
     "search_appointments",
     {
-      description: "Advanced search for appointments by carrier, reference number, status, or date range",
+      description: `Free-text search for appointments. Use this when searching by keyword across appointment fields. For structured filtering/querying, use list_appointments instead.`,
       inputSchema: {
-        carrierId: z.string().optional().describe("Filter by carrier ID"),
-        referenceNumber: z.string().optional().describe("Search by reference number"),
-        status: z.string().optional().describe("Filter by status"),
-        startDate: z.string().optional().describe("Start date (YYYY-MM-DD)"),
-        endDate: z.string().optional().describe("End date (YYYY-MM-DD)"),
-        warehouseId: z.string().optional().describe("Filter by warehouse ID"),
-        page: z.number().optional().describe("Page number"),
-        limit: z.number().optional().describe("Items per page"),
+        searchStr: z.string().optional().describe("Free-text search string (searches across appointment fields)"),
+        scheduledStart: z.string().optional().describe("Start of date range for appointment start time (ISO 8601 datetime)"),
+        scheduledEnd: z.string().optional().describe("End of date range for appointment start time (ISO 8601 datetime)"),
+        statuses: z.array(z.string()).optional().describe("Filter by statuses (e.g. ['Scheduled','InProgress'])"),
+        users: z.array(z.string()).optional().describe("Filter by user/carrier IDs"),
+        refNumber: z.string().optional().describe("Filter by reference number"),
+        tags: z.string().optional().describe("Filter by tag"),
+        notes: z.string().optional().describe("Filter by notes content"),
+        customFields: z.string().optional().describe("Filter by custom fields"),
+        sortBy: z.string().optional().describe("Sort field (default: 'appointment.start')"),
+        sortDesc: z.boolean().optional().describe("Sort descending (default: false)"),
+        size: z.number().optional().describe("Page size (default: 10)"),
+        from: z.number().optional().describe("Offset to start from (default: 0)"),
       },
     },
-    async (params) => {
+    async ({ sortBy, sortDesc, size, from, ...rest }) => {
+      const body = {
+        ...rest,
+        sort: { sortBy: sortBy ?? "appointment.start", sortDesc: sortDesc ?? false },
+        pagination: { size: size ?? 10, from: from ?? 0 },
+      };
       const data = await api.request({
         method: "POST",
         path: "/search/appointments",
-        body: params,
+        body,
       });
       return jsonResponse(data);
     }

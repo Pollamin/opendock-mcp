@@ -4,7 +4,7 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const RETRY_DELAY_MS = 1_000;
 const RETRYABLE_STATUS_CODES = new Set([502, 503, 504]);
 
-export type QueryParams = Record<string, string | number | boolean | undefined>;
+export type QueryParams = Record<string, string | number | boolean | string[] | undefined>;
 
 export interface ApiRequestOptions {
   method?: string;
@@ -55,7 +55,12 @@ export class ApiClient {
 
     if (opts.query) {
       for (const [key, value] of Object.entries(opts.query)) {
-        if (value !== undefined) {
+        if (value === undefined) continue;
+        if (Array.isArray(value)) {
+          for (const item of value) {
+            url.searchParams.append(key, item);
+          }
+        } else {
           url.searchParams.set(key, String(value));
         }
       }
