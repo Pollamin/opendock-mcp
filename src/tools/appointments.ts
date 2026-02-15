@@ -56,7 +56,6 @@ SORT: Each sort is "field,direction". Use array for multi-sort.
     async (params) => {
       const { startDate, endDate, s, join, sort, ...rest } = params;
       const query: QueryParams = { ...rest };
-      // Raw s= takes precedence; otherwise build from convenience filters
       query.s = s ?? buildDateSearch(startDate, endDate);
       if (join) query.join = join;
       if (sort) query.sort = sort;
