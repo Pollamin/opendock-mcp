@@ -40,7 +40,7 @@ src/
 - **API client pattern** — all tools call `api.request({ method, path, query, body })`, never `fetch` directly
 - **`jsonResponse` helper** — `tools/index.ts` exports `jsonResponse(data)` which wraps data as `{ content: [{ type: "text", text: JSON.stringify(data, null, 2) }] }`. All tool handlers use it for consistent MCP responses.
 - **`textResponse` helper** — `tools/index.ts` exports `textResponse(message)` for plain-text MCP responses (used by delete/undo operations).
-- **`QueryParams` type** — `api/client.ts` exports `QueryParams = Record<string, string | number | boolean | undefined>` used by list/search tools.
+- **`QueryParams` type** — `api/client.ts` exports `QueryParams = Record<string, string | number | boolean | string[] | undefined>` used by list/search tools.
 - **Auth is lazy** — no network call until first tool invocation; token refreshes proactively 60s before expiry
 
 ## Adding a New Tool
