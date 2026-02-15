@@ -54,11 +54,11 @@ export function registerDockTools(server: McpServer, api: ApiClient) {
         loadTypeIds: z.array(z.string()).optional().describe("Load type IDs to assign to this dock"),
       },
     },
-    async ({ warehouseId, loadTypeIds, ...body }) => {
+    async (params) => {
       const data = await api.request({
         method: "POST",
         path: "/dock",
-        body: { ...body, warehouseId, loadTypeIds },
+        body: params,
       });
       return jsonResponse(data);
     }

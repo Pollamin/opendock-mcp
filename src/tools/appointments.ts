@@ -3,10 +3,6 @@ import { z } from "zod";
 import { ApiClient, QueryParams } from "../api/client.js";
 import { jsonResponse, textResponse } from "./index.js";
 
-/**
- * Build a NestJSX/Crud `s=` search JSON string from startDate/endDate.
- * Filters on the appointment `start` field.
- */
 function buildDateSearch(startDate?: string, endDate?: string): string | undefined {
   if (!startDate && !endDate) return undefined;
   const conditions: object[] = [];

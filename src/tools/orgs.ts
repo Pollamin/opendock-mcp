@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api/client.js";
-import { jsonResponse, textResponse } from "./index.js";
+import { jsonResponse } from "./index.js";
 
 export function registerOrgTools(server: McpServer, api: ApiClient) {
   server.registerTool(

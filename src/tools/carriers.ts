@@ -3,8 +3,6 @@ import { z } from "zod";
 import { ApiClient, QueryParams } from "../api/client.js";
 import { jsonResponse } from "./index.js";
 
-// Note: carrier endpoints return User schemas, not a dedicated Carrier type
-
 export function registerCarrierTools(server: McpServer, api: ApiClient) {
   server.registerTool(
     "list_carriers",

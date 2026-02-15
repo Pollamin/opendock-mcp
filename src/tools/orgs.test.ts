@@ -1,24 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { registerOrgTools } from "./orgs.js";
-
-function mockServer() {
-  const tools = new Map<string, { opts: any; handler: Function }>();
-  return {
-    registerTool: vi.fn((name: string, opts: any, handler: Function) => {
-      tools.set(name, { opts, handler });
-    }),
-    tools,
-    call(name: string, params: any) {
-      const tool = tools.get(name);
-      if (!tool) throw new Error(`Tool "${name}" not registered`);
-      return tool.handler(params);
-    },
-  };
-}
-
-function mockApi() {
-  return { request: vi.fn() };
-}
+import { mockServer, mockApi } from "./test-utils.js";
 
 describe("org tools", () => {
   let server: ReturnType<typeof mockServer>;

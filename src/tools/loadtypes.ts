@@ -3,6 +3,11 @@ import { z } from "zod";
 import { ApiClient, QueryParams } from "../api/client.js";
 import { jsonResponse, textResponse } from "./index.js";
 
+const directionEnum = z.enum(["Inbound", "Outbound", "Inbound/Outbound"]);
+const operationSchema = z.enum(["Live", "Drop", "Other"]).optional().describe("Operation type");
+const equipmentTypeSchema = z.enum(["Dry Van", "Flatbed", "Reefer", "Other"]).optional().describe("Equipment type");
+const transportationModeSchema = z.enum(["FTL", "PTL", "Other"]).optional().describe("Transportation mode");
+
 export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
   server.registerTool(
     "list_load_types",
@@ -65,10 +70,10 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
         warehouseId: z.string().optional().describe("Warehouse ID"),
         orgId: z.string().optional().describe("Organization ID"),
         name: z.string().optional().describe("Load type name"),
-        direction: z.enum(["Inbound", "Outbound", "Inbound/Outbound"]).describe("Load direction"),
-        operation: z.enum(["Live", "Drop", "Other"]).optional().describe("Operation type"),
-        equipmentType: z.enum(["Dry Van", "Flatbed", "Reefer", "Other"]).optional().describe("Equipment type"),
-        transportationMode: z.enum(["FTL", "PTL", "Other"]).optional().describe("Transportation mode"),
+        direction: directionEnum.describe("Load direction"),
+        operation: operationSchema,
+        equipmentType: equipmentTypeSchema,
+        transportationMode: transportationModeSchema,
         allowCarrierScheduling: z.boolean().optional().describe("Allow carriers to self-schedule"),
         duration_min: z.number().optional().describe("Duration in minutes"),
         description: z.string().optional().describe("Load type description"),
@@ -91,10 +96,10 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
       inputSchema: {
         id: z.string().describe("Load type ID"),
         name: z.string().optional().describe("Load type name"),
-        direction: z.enum(["Inbound", "Outbound", "Inbound/Outbound"]).optional().describe("Load direction"),
-        operation: z.enum(["Live", "Drop", "Other"]).optional().describe("Operation type"),
-        equipmentType: z.enum(["Dry Van", "Flatbed", "Reefer", "Other"]).optional().describe("Equipment type"),
-        transportationMode: z.enum(["FTL", "PTL", "Other"]).optional().describe("Transportation mode"),
+        direction: directionEnum.optional().describe("Load direction"),
+        operation: operationSchema,
+        equipmentType: equipmentTypeSchema,
+        transportationMode: transportationModeSchema,
         allowCarrierScheduling: z.boolean().optional().describe("Allow carriers to self-schedule"),
         duration_min: z.number().optional().describe("Duration in minutes"),
         description: z.string().optional().describe("Load type description"),

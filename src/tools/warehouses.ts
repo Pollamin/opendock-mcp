@@ -3,6 +3,15 @@ import { z } from "zod";
 import { ApiClient, QueryParams } from "../api/client.js";
 import { jsonResponse, textResponse } from "./index.js";
 
+const amenitiesSchema = z.array(z.enum([
+  "Lumper services", "Drivers restroom", "Overnight parking", "Free Wi-Fi",
+])).optional().describe("Available amenities");
+
+const ppeSchema = z.array(z.enum([
+  "Face Mask", "Safety Glasses", "Hard Hat", "Safety Boots", "Gloves",
+  "High Visibility Vest", "Long Pants", "Long Sleeves", "No Smoking", "Hair and Beard Net",
+])).optional().describe("Required PPE");
+
 export function registerWarehouseTools(server: McpServer, api: ApiClient) {
   server.registerTool(
     "list_warehouses",
@@ -75,13 +84,8 @@ export function registerWarehouseTools(server: McpServer, api: ApiClient) {
         instructions: z.string().optional().describe("Warehouse instructions"),
         allowCarrierScheduling: z.boolean().optional().describe("Allow carriers to self-schedule"),
         ccEmails: z.array(z.string()).optional().describe("CC email addresses"),
-        amenities: z.array(z.enum([
-          "Lumper services", "Drivers restroom", "Overnight parking", "Free Wi-Fi",
-        ])).optional().describe("Available amenities"),
-        ppeRequirements: z.array(z.enum([
-          "Face Mask", "Safety Glasses", "Hard Hat", "Safety Boots", "Gloves",
-          "High Visibility Vest", "Long Pants", "Long Sleeves", "No Smoking", "Hair and Beard Net",
-        ])).optional().describe("Required PPE"),
+        amenities: amenitiesSchema,
+        ppeRequirements: ppeSchema,
       },
     },
     async (params) => {
@@ -114,13 +118,8 @@ export function registerWarehouseTools(server: McpServer, api: ApiClient) {
         instructions: z.string().optional().describe("Warehouse instructions"),
         allowCarrierScheduling: z.boolean().optional().describe("Allow carriers to self-schedule"),
         ccEmails: z.array(z.string()).optional().describe("CC email addresses"),
-        amenities: z.array(z.enum([
-          "Lumper services", "Drivers restroom", "Overnight parking", "Free Wi-Fi",
-        ])).optional().describe("Available amenities"),
-        ppeRequirements: z.array(z.enum([
-          "Face Mask", "Safety Glasses", "Hard Hat", "Safety Boots", "Gloves",
-          "High Visibility Vest", "Long Pants", "Long Sleeves", "No Smoking", "Hair and Beard Net",
-        ])).optional().describe("Required PPE"),
+        amenities: amenitiesSchema,
+        ppeRequirements: ppeSchema,
       },
     },
     async ({ id, ...body }) => {
