@@ -24,9 +24,15 @@ sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/g" server.json
 
 echo "Bumped to $NEW_VERSION"
 
+TOKEN_FILE="$(dirname "$0")/.github_token"
+if [ ! -f "$TOKEN_FILE" ]; then
+  echo "Error: $TOKEN_FILE not found. Create it and fill it with your GitHub token."
+  exit 1
+fi
+GITHUB_TOKEN="$(cat "$TOKEN_FILE" | tr -d '[:space:]')"
+
 npm publish --access public --otp "$OTP"
-# Should already be authed via --token <token>
-# mcp-publisher login github
+mcp-publisher login github --token $GITHUB_TOKEN
 mcp-publisher publish
 
 # Commit and push the version bump
