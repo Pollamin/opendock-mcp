@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/opendock-mcp.svg)](https://www.npmjs.com/package/opendock-mcp)
 
-An [MCP](https://modelcontextprotocol.io/) server that connects AI assistants (Claude, etc.) to the legendary [Opendock](https://www.opendock.com/) Neutron API.
+An [MCP](https://modelcontextprotocol.io/) server that connects AI assistants (Claude, etc.) to the legendary [Opendock](https://www.opendock.com/) [Neutron](https://neutron.opendock.com/docs) API.
 
 ## Install
 
