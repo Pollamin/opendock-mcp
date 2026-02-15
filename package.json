@@ -1,6 +1,6 @@
 {
   "name": "opendock-mcp",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "MCP server for the Opendock Neutron API",
   "mcpName": "io.github.Pollamin/opendock",
   "type": "module",
