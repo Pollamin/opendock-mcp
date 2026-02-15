@@ -19,7 +19,7 @@ const server = new McpServer({
   version,
 });
 
-registerAllTools(server, api);
+registerAllTools(server, api, version);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

@@ -10,7 +10,13 @@ export function jsonResponse(data: unknown) {
   return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
 }
 
-export function registerAllTools(server: McpServer, api: ApiClient) {
+export function registerAllTools(server: McpServer, api: ApiClient, version: string) {
+  server.registerTool(
+    "get_version",
+    { description: "Get the opendock-mcp server version" },
+    async () => jsonResponse({ version })
+  );
+
   // Auth
   server.registerTool(
     "get_profile",
