@@ -20,7 +20,7 @@ npm install -g opendock-mcp
 
 ## Tools
 
-**42 tools** across 8 categories:
+**48 tools** across 10 categories:
 
 | Category | Tools |
 |----------|-------|
@@ -30,8 +30,10 @@ npm install -g opendock-mcp
 | **Load Types** | `list_load_types`, `get_load_type`, `get_load_type_availability`, `create_load_type`, `update_load_type`, `delete_load_type` |
 | **Appointments** | `list_appointments`, `search_appointments`, `get_appointment`, `create_appointment`, `update_appointment`, `delete_appointment`, `get_public_appointment`, `undo_appointment_status`, `create_recurring_appointments`, `delete_recurring_appointments`, `add_appointment_tag`, `remove_appointment_tag` |
 | **Carriers** | `list_carriers`, `get_carrier`, `create_carrier`, `update_carrier`, `get_booked_carriers` |
+| **Companies** | `list_companies`, `get_company`, `create_company` |
 | **Orgs** | `get_org`, `update_org`, `update_favorite_carriers` |
 | **Audit Log** | `get_audit_log` |
+| **Settings Metadata** | `get_settings_metadata`, `get_setting_metadata`, `validate_settings_metadata` |
 
 ## Prerequisites
 
