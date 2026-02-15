@@ -20,16 +20,18 @@ npm install -g opendock-mcp
 
 ## Tools
 
-**24 tools** across 6 categories:
+**42 tools** across 8 categories:
 
 | Category | Tools |
 |----------|-------|
 | **General** | `get_version`, `get_profile` |
-| **Warehouses** | `list_warehouses`, `get_warehouse`, `get_warehouse_hours` |
-| **Docks** | `list_docks`, `get_dock` |
-| **Load Types** | `list_load_types`, `get_load_type`, `get_load_type_availability` |
+| **Warehouses** | `list_warehouses`, `get_warehouse`, `get_warehouse_hours`, `create_warehouse`, `update_warehouse`, `delete_warehouse` |
+| **Docks** | `list_docks`, `get_dock`, `create_dock`, `update_dock`, `delete_dock`, `sort_docks`, `get_dock_availability` |
+| **Load Types** | `list_load_types`, `get_load_type`, `get_load_type_availability`, `create_load_type`, `update_load_type`, `delete_load_type` |
 | **Appointments** | `list_appointments`, `search_appointments`, `get_appointment`, `create_appointment`, `update_appointment`, `delete_appointment`, `get_public_appointment`, `undo_appointment_status`, `create_recurring_appointments`, `delete_recurring_appointments`, `add_appointment_tag`, `remove_appointment_tag` |
-| **Carriers** | `list_carriers`, `get_carrier` |
+| **Carriers** | `list_carriers`, `get_carrier`, `create_carrier`, `update_carrier`, `get_booked_carriers` |
+| **Orgs** | `get_org`, `update_org`, `update_favorite_carriers` |
+| **Audit Log** | `get_audit_log` |
 
 ## Prerequisites
 

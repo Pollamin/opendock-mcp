@@ -21,11 +21,13 @@ src/
 │   └── client.ts         # ApiClient: fetch wrapper, auth headers, 401 auto-retry
 └── tools/
     ├── index.ts          # registerAllTools() + get_version + get_profile tools
-    ├── warehouses.ts     # 3 tools
-    ├── docks.ts          # 2 tools
-    ├── loadtypes.ts      # 3 tools
+    ├── warehouses.ts     # 6 tools
+    ├── docks.ts          # 7 tools
+    ├── loadtypes.ts      # 6 tools
     ├── appointments.ts   # 12 tools
-    └── carriers.ts       # 2 tools
+    ├── carriers.ts       # 5 tools
+    ├── orgs.ts           # 3 tools
+    └── audit-log.ts      # 1 tool
 ```
 
 ## Key Conventions
@@ -54,7 +56,7 @@ src/
 npm test          # vitest run — all tests
 ```
 
-- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`
+- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`, `src/tools/orgs.test.ts`, `src/tools/audit-log.test.ts`
 - `tsconfig.json` excludes `src/**/*.test.ts` so tests don't end up in `dist/`
 - Mock `fetch` via `vi.stubGlobal`; use `vi.useFakeTimers()` for retry delay tests
 

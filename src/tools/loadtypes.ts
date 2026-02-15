@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient, QueryParams } from "../api/client.js";
-import { jsonResponse } from "./index.js";
+import { jsonResponse, textResponse } from "./index.js";
 
 export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
   server.registerTool(
@@ -54,6 +54,76 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
         body: { startDate, endDate },
       });
       return jsonResponse(data);
+    }
+  );
+
+  server.registerTool(
+    "create_load_type",
+    {
+      description: "Create a new load type",
+      inputSchema: {
+        warehouseId: z.string().optional().describe("Warehouse ID"),
+        orgId: z.string().optional().describe("Organization ID"),
+        name: z.string().optional().describe("Load type name"),
+        direction: z.enum(["Inbound", "Outbound", "Inbound/Outbound"]).describe("Load direction"),
+        operation: z.enum(["Live", "Drop", "Other"]).optional().describe("Operation type"),
+        equipmentType: z.enum(["Dry Van", "Flatbed", "Reefer", "Other"]).optional().describe("Equipment type"),
+        transportationMode: z.enum(["FTL", "PTL", "Other"]).optional().describe("Transportation mode"),
+        allowCarrierScheduling: z.boolean().optional().describe("Allow carriers to self-schedule"),
+        duration_min: z.number().optional().describe("Duration in minutes"),
+        description: z.string().optional().describe("Load type description"),
+      },
+    },
+    async (params) => {
+      const data = await api.request({
+        method: "POST",
+        path: "/loadtype",
+        body: params,
+      });
+      return jsonResponse(data);
+    }
+  );
+
+  server.registerTool(
+    "update_load_type",
+    {
+      description: "Update a load type",
+      inputSchema: {
+        id: z.string().describe("Load type ID"),
+        name: z.string().optional().describe("Load type name"),
+        direction: z.enum(["Inbound", "Outbound", "Inbound/Outbound"]).optional().describe("Load direction"),
+        operation: z.enum(["Live", "Drop", "Other"]).optional().describe("Operation type"),
+        equipmentType: z.enum(["Dry Van", "Flatbed", "Reefer", "Other"]).optional().describe("Equipment type"),
+        transportationMode: z.enum(["FTL", "PTL", "Other"]).optional().describe("Transportation mode"),
+        allowCarrierScheduling: z.boolean().optional().describe("Allow carriers to self-schedule"),
+        duration_min: z.number().optional().describe("Duration in minutes"),
+        description: z.string().optional().describe("Load type description"),
+      },
+    },
+    async ({ id, ...body }) => {
+      const data = await api.request({
+        method: "PATCH",
+        path: `/loadtype/${id}`,
+        body,
+      });
+      return jsonResponse(data);
+    }
+  );
+
+  server.registerTool(
+    "delete_load_type",
+    {
+      description: "Delete a load type",
+      inputSchema: {
+        id: z.string().describe("Load type ID"),
+      },
+    },
+    async ({ id }) => {
+      await api.request({
+        method: "DELETE",
+        path: `/loadtype/${id}`,
+      });
+      return textResponse(`Load type ${id} deleted successfully.`);
     }
   );
 }

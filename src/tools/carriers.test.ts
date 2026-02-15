@@ -30,8 +30,8 @@ describe("carrier tools", () => {
     registerCarrierTools(server as any, api as any);
   });
 
-  it("registers all 2 carrier tools", () => {
-    expect(server.tools.size).toBe(2);
+  it("registers all 5 carrier tools", () => {
+    expect(server.tools.size).toBe(5);
   });
 
   it("list_carriers sends GET /carrier with query params", async () => {
@@ -49,5 +49,34 @@ describe("carrier tools", () => {
     const result = await server.call("get_carrier", { id: "c1" });
     expect(api.request).toHaveBeenCalledWith({ path: "/carrier/c1" });
     expect(JSON.parse(result.content[0].text)).toEqual({ id: "c1", name: "ACME Freight" });
+  });
+
+  it("create_carrier sends POST /carrier", async () => {
+    api.request.mockResolvedValueOnce({ id: "c2", email: "new@acme.com" });
+    const result = await server.call("create_carrier", { email: "new@acme.com", firstName: "Jane" });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "POST",
+      path: "/carrier",
+      body: { email: "new@acme.com", firstName: "Jane" },
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({ id: "c2", email: "new@acme.com" });
+  });
+
+  it("update_carrier sends PATCH /carrier/:id", async () => {
+    api.request.mockResolvedValueOnce({ id: "c1", phone: "555-1234" });
+    const result = await server.call("update_carrier", { id: "c1", phone: "555-1234" });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "PATCH",
+      path: "/carrier/c1",
+      body: { phone: "555-1234" },
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({ id: "c1", phone: "555-1234" });
+  });
+
+  it("get_booked_carriers sends GET /carrier/booked", async () => {
+    api.request.mockResolvedValueOnce([{ id: "c1" }]);
+    const result = await server.call("get_booked_carriers", {});
+    expect(api.request).toHaveBeenCalledWith({ path: "/carrier/booked" });
+    expect(JSON.parse(result.content[0].text)).toEqual([{ id: "c1" }]);
   });
 });

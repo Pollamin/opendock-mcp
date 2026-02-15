@@ -30,8 +30,8 @@ describe("warehouse tools", () => {
     registerWarehouseTools(server as any, api as any);
   });
 
-  it("registers all 3 warehouse tools", () => {
-    expect(server.tools.size).toBe(3);
+  it("registers all 6 warehouse tools", () => {
+    expect(server.tools.size).toBe(6);
   });
 
   it("list_warehouses sends GET /warehouse with query params", async () => {
@@ -74,5 +74,37 @@ describe("warehouse tools", () => {
       path: "/warehouse/w1/get-hours-of-operation",
       body: undefined,
     });
+  });
+
+  it("create_warehouse sends POST /warehouse", async () => {
+    api.request.mockResolvedValueOnce({ id: "w2", name: "New WH" });
+    const result = await server.call("create_warehouse", { name: "New WH", timezone: "America/Chicago" });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "POST",
+      path: "/warehouse",
+      body: { name: "New WH", timezone: "America/Chicago" },
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({ id: "w2", name: "New WH" });
+  });
+
+  it("update_warehouse sends PATCH /warehouse/:id", async () => {
+    api.request.mockResolvedValueOnce({ id: "w1", name: "Updated" });
+    const result = await server.call("update_warehouse", { id: "w1", name: "Updated" });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "PATCH",
+      path: "/warehouse/w1",
+      body: { name: "Updated" },
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({ id: "w1", name: "Updated" });
+  });
+
+  it("delete_warehouse sends DELETE /warehouse/:id", async () => {
+    api.request.mockResolvedValueOnce(undefined);
+    const result = await server.call("delete_warehouse", { id: "w1" });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "DELETE",
+      path: "/warehouse/w1",
+    });
+    expect(result.content[0].text).toContain("deleted successfully");
   });
 });
