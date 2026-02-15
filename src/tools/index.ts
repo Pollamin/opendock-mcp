@@ -7,6 +7,7 @@ import { registerAppointmentTools } from "./appointments.js";
 import { registerCarrierTools } from "./carriers.js";
 import { registerOrgTools } from "./orgs.js";
 import { registerAuditLogTools } from "./audit-log.js";
+import { registerCompanyTools } from "./companies.js";
 
 export function jsonResponse(data: unknown) {
   return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
@@ -40,4 +41,5 @@ export function registerAllTools(server: McpServer, api: ApiClient, version: str
   registerCarrierTools(server, api);
   registerOrgTools(server, api);
   registerAuditLogTools(server, api);
+  registerCompanyTools(server, api);
 }

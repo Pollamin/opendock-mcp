@@ -26,6 +26,7 @@ src/
     ├── loadtypes.ts      # 6 tools
     ├── appointments.ts   # 12 tools
     ├── carriers.ts       # 5 tools
+    ├── companies.ts      # 3 tools
     ├── orgs.ts           # 3 tools
     └── audit-log.ts      # 1 tool
 ```
@@ -56,7 +57,7 @@ src/
 npm test          # vitest run — all tests
 ```
 
-- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`, `src/tools/orgs.test.ts`, `src/tools/audit-log.test.ts`
+- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`, `src/tools/companies.test.ts`, `src/tools/orgs.test.ts`, `src/tools/audit-log.test.ts`
 - `tsconfig.json` excludes `src/**/*.test.ts` so tests don't end up in `dist/`
 - Shared test helpers (`mockServer`, `mockApi`) live in `src/tools/test-utils.ts`
 - Mock `fetch` via `vi.stubGlobal`; use `vi.useFakeTimers()` for retry delay tests
