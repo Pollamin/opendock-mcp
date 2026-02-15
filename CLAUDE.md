@@ -20,11 +20,11 @@ src/
 │   ├── auth.ts           # AuthManager: login, refresh, JWT decode (no external lib)
 │   └── client.ts         # ApiClient: fetch wrapper, auth headers, 401 auto-retry
 └── tools/
-    ├── index.ts          # registerAllTools() + get_profile tool
+    ├── index.ts          # registerAllTools() + get_version + get_profile tools
     ├── warehouses.ts     # 3 tools
     ├── docks.ts          # 2 tools
     ├── loadtypes.ts      # 3 tools
-    ├── appointments.ts   # 6 tools
+    ├── appointments.ts   # 12 tools
     └── carriers.ts       # 2 tools
 ```
 
@@ -34,15 +34,17 @@ src/
 - **No external HTTP library** — uses native `fetch` (Node 18+)
 - **No JWT library** — `AuthManager.decodeJwt()` uses `Buffer.from(base64url)`
 - **Zod schemas** — each tool defines its input schema inline with `z.string()`, `z.number()`, etc.
-- **Tool pattern** — each tool file exports a `register*Tools(server, api)` function that calls `server.tool()`
+- **Tool pattern** — each tool file exports a `register*Tools(server, api)` function that calls `server.registerTool()`
 - **API client pattern** — all tools call `api.request({ method, path, query, body })`, never `fetch` directly
 - **`jsonResponse` helper** — `tools/index.ts` exports `jsonResponse(data)` which wraps data as `{ content: [{ type: "text", text: JSON.stringify(data, null, 2) }] }`. All tool handlers use it for consistent MCP responses.
+- **`textResponse` helper** — `tools/index.ts` exports `textResponse(message)` for plain-text MCP responses (used by delete/undo operations).
+- **`QueryParams` type** — `api/client.ts` exports `QueryParams = Record<string, string | number | boolean | undefined>` used by list/search tools.
 - **Auth is lazy** — no network call until first tool invocation; token refreshes proactively 60s before expiry
 
 ## Adding a New Tool
 
 1. Add the tool in the appropriate `src/tools/*.ts` file (or create a new file)
-2. Use `server.tool(name, description, zodSchema, handler)` — follow existing patterns
+2. Use `server.registerTool(name, { description, inputSchema }, handler)` — follow existing patterns
 3. If new file: export a `register*Tools` function and call it from `src/tools/index.ts`
 4. Run `npm run build` to verify
 
@@ -52,7 +54,7 @@ src/
 npm test          # vitest run — all tests
 ```
 
-- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`
+- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`
 - `tsconfig.json` excludes `src/**/*.test.ts` so tests don't end up in `dist/`
 - Mock `fetch` via `vi.stubGlobal`; use `vi.useFakeTimers()` for retry delay tests
 

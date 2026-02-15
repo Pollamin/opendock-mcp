@@ -20,15 +20,15 @@ npm install -g opendock-mcp
 
 ## Tools
 
-**17 tools** across 6 categories:
+**24 tools** across 6 categories:
 
 | Category | Tools |
 |----------|-------|
-| **Auth** | `get_profile` |
+| **General** | `get_version`, `get_profile` |
 | **Warehouses** | `list_warehouses`, `get_warehouse`, `get_warehouse_hours` |
 | **Docks** | `list_docks`, `get_dock` |
 | **Load Types** | `list_load_types`, `get_load_type`, `get_load_type_availability` |
-| **Appointments** | `list_appointments`, `search_appointments`, `get_appointment`, `create_appointment`, `update_appointment`, `delete_appointment` |
+| **Appointments** | `list_appointments`, `search_appointments`, `get_appointment`, `create_appointment`, `update_appointment`, `delete_appointment`, `get_public_appointment`, `undo_appointment_status`, `create_recurring_appointments`, `delete_recurring_appointments`, `add_appointment_tag`, `remove_appointment_tag` |
 | **Carriers** | `list_carriers`, `get_carrier` |
 
 ## Prerequisites
