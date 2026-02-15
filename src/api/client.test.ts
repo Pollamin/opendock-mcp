@@ -227,6 +227,26 @@ describe("ApiClient", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("returns undefined when 401 retry gives 204", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn()
+        .mockResolvedValueOnce(errorResponse(401))
+        .mockResolvedValueOnce({ ok: true, status: 204 })
+    );
+    const client = new ApiClient("https://api.test", auth as any);
+
+    const result = await client.request({ method: "DELETE", path: "/items/1" });
+    expect(result).toBeUndefined();
+  });
+
+  it("propagates network errors from fetch", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce(new TypeError("fetch failed")));
+    const client = new ApiClient("https://api.test", auth as any);
+
+    await expect(client.request({ path: "/items" })).rejects.toThrow("fetch failed");
+  });
+
   it("strips trailing slashes from base URL", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse({})));
     const client = new ApiClient("https://api.test///", auth as any);

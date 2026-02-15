@@ -31,6 +31,7 @@ export class ApiClient {
         const body = await retry.text();
         throw new Error(`API error ${retry.status}: ${body}`);
       }
+      if (retry.status === 204) return undefined as T;
       return (await retry.json()) as T;
     }
 

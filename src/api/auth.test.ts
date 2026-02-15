@@ -145,4 +145,18 @@ describe("AuthManager", () => {
     const result = await auth.getToken();
     expect(result).toBe(token);
   });
+
+  it("treats malformed JWT as valid (no refresh attempt)", async () => {
+    const token = "not-a-jwt";
+    const auth = new AuthManager({ apiUrl: "https://api.test", token });
+    const result = await auth.getToken();
+    expect(result).toBe(token);
+  });
+
+  it("treats JWT with corrupt base64 payload as valid (no refresh attempt)", async () => {
+    const token = "header.!!!invalid-base64!!!.sig";
+    const auth = new AuthManager({ apiUrl: "https://api.test", token });
+    const result = await auth.getToken();
+    expect(result).toBe(token);
+  });
 });
