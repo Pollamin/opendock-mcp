@@ -12,10 +12,9 @@ export function jsonResponse(data: unknown) {
 
 export function registerAllTools(server: McpServer, api: ApiClient) {
   // Auth
-  server.tool(
+  server.registerTool(
     "get_profile",
-    "Get the current authenticated user's profile",
-    {},
+    { description: "Get the current authenticated user's profile" },
     async () => {
       const data = await api.request({ path: "/auth/profile" });
       return jsonResponse(data);

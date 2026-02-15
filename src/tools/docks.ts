@@ -4,13 +4,15 @@ import { ApiClient } from "../api/client.js";
 import { jsonResponse } from "./index.js";
 
 export function registerDockTools(server: McpServer, api: ApiClient) {
-  server.tool(
+  server.registerTool(
     "list_docks",
-    "List docks with optional filters",
     {
-      warehouseId: z.string().optional().describe("Filter by warehouse ID"),
-      page: z.number().optional().describe("Page number"),
-      limit: z.number().optional().describe("Items per page"),
+      description: "List docks with optional filters",
+      inputSchema: {
+        warehouseId: z.string().optional().describe("Filter by warehouse ID"),
+        page: z.number().optional().describe("Page number"),
+        limit: z.number().optional().describe("Items per page"),
+      },
     },
     async (params) => {
       const data = await api.request({
@@ -21,11 +23,13 @@ export function registerDockTools(server: McpServer, api: ApiClient) {
     }
   );
 
-  server.tool(
+  server.registerTool(
     "get_dock",
-    "Get details for a specific dock",
     {
-      id: z.string().describe("Dock ID"),
+      description: "Get details for a specific dock",
+      inputSchema: {
+        id: z.string().describe("Dock ID"),
+      },
     },
     async ({ id }) => {
       const data = await api.request({ path: `/dock/${id}` });
