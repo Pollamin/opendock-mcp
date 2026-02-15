@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ApiClient } from "../api/client.js";
-import { jsonResponse } from "./index.js";
+import { jsonResponse, textResponse } from "./index.js";
 
 export function registerAppointmentTools(server: McpServer, api: ApiClient) {
   server.registerTool(
@@ -130,7 +130,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         method: "DELETE",
         path: `/appointment/${id}`,
       });
-      return { content: [{ type: "text" as const, text: `Appointment ${id} deleted successfully.` }] };
+      return textResponse(`Appointment ${id} deleted successfully.`);
     }
   );
 
@@ -161,7 +161,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         method: "PATCH",
         path: `/appointment/${id}/undo-latest-status`,
       });
-      return { content: [{ type: "text" as const, text: `Undid latest status change for appointment ${id}.` }] };
+      return textResponse(`Undid latest status change for appointment ${id}.`);
     }
   );
 
@@ -201,7 +201,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         method: "DELETE",
         path: `/appointment/${id}/recurring`,
       });
-      return { content: [{ type: "text" as const, text: `Deleted recurring series for appointment ${id}.` }] };
+      return textResponse(`Deleted recurring series for appointment ${id}.`);
     }
   );
 
@@ -239,7 +239,7 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
         path: `/appointment/${id}/tag`,
         body: { tag },
       });
-      return { content: [{ type: "text" as const, text: `Removed tag '${tag}' from appointment ${id}.` }] };
+      return textResponse(`Removed tag '${tag}' from appointment ${id}.`);
     }
   );
 }

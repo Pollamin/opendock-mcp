@@ -4,10 +4,12 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const RETRY_DELAY_MS = 1_000;
 const RETRYABLE_STATUS_CODES = new Set([502, 503, 504]);
 
+export type QueryParams = Record<string, string | number | boolean | undefined>;
+
 export interface ApiRequestOptions {
   method?: string;
   path: string;
-  query?: Record<string, string | number | boolean | undefined>;
+  query?: QueryParams;
   body?: unknown;
 }
 

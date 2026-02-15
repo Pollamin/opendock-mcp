@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ApiClient } from "../api/client.js";
+import { ApiClient, QueryParams } from "../api/client.js";
 import { jsonResponse } from "./index.js";
 
 export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
@@ -17,7 +17,7 @@ export function registerLoadTypeTools(server: McpServer, api: ApiClient) {
     async (params) => {
       const data = await api.request({
         path: "/loadtype",
-        query: params as Record<string, string | number | undefined>,
+        query: params as QueryParams,
       });
       return jsonResponse(data);
     }
