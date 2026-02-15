@@ -20,7 +20,7 @@ npm install -g opendock-mcp
 
 ## Tools
 
-**48 tools** across 10 categories:
+**69 tools** across 11 categories:
 
 | Category | Tools |
 |----------|-------|
@@ -34,6 +34,7 @@ npm install -g opendock-mcp
 | **Orgs** | `get_org`, `update_org`, `update_favorite_carriers` |
 | **Audit Log** | `get_audit_log` |
 | **Settings Metadata** | `get_settings_metadata`, `get_setting_metadata`, `validate_settings_metadata` |
+| **Metrics** | `get_appointment_volume_by_date`, `get_appointment_volume_by_carrier`, `get_appointment_volume_by_load_type`, `get_appointment_volume_by_time_of_day`, `get_appointment_volume_by_day_of_week`, `get_appointment_avg_duration_by_load_type`, `get_appointment_avg_duration_by_status`, `get_appointment_avg_duration_by_dock_and_status`, `get_appointment_count_for_carrier`, `get_appointment_count_by_status_for_carrier`, `get_appointment_count_for_docks`, `get_reserve_count_for_user`, `get_dock_dwell_time`, `get_carrier_status_percentages`, `list_appointment_metrics`, `export_appointment_metrics_excel`, `get_appointment_status_times`, `get_first_available_appointment`, `get_warehouse_insights`, `get_warehouse_capacity_usage`, `export_yard_data_excel` |
 
 ## Prerequisites
 
