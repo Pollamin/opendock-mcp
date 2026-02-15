@@ -26,36 +26,24 @@ export class ApiClient {
     if (response.status === 401) {
       console.error(`[opendock] Got 401 on ${opts.method || "GET"} ${opts.path}, retrying with fresh token`);
       this.auth.clearToken();
-      const retry = await this.doRequest(opts);
-      if (!retry.ok) {
-        const body = await retry.text();
-        throw new Error(`API error ${retry.status}: ${body}`);
-      }
-      if (retry.status === 204) return undefined as T;
-      return (await retry.json()) as T;
+      return this.handleResponse<T>(await this.doRequest(opts));
     }
 
     if (RETRYABLE_STATUS_CODES.has(response.status)) {
       console.error(`[opendock] Got ${response.status} on ${opts.method || "GET"} ${opts.path}, retrying in ${RETRY_DELAY_MS}ms`);
       await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-      const retry = await this.doRequest(opts);
-      if (!retry.ok) {
-        const body = await retry.text();
-        throw new Error(`API error ${retry.status}: ${body}`);
-      }
-      if (retry.status === 204) return undefined as T;
-      return (await retry.json()) as T;
+      return this.handleResponse<T>(await this.doRequest(opts));
     }
 
+    return this.handleResponse<T>(response);
+  }
+
+  private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const body = await response.text();
       throw new Error(`API error ${response.status}: ${body}`);
     }
-
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
+    if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   }
 

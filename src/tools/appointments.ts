@@ -133,4 +133,113 @@ export function registerAppointmentTools(server: McpServer, api: ApiClient) {
       return { content: [{ type: "text" as const, text: `Appointment ${id} deleted successfully.` }] };
     }
   );
+
+  server.registerTool(
+    "get_public_appointment",
+    {
+      description: "Get public appointment details (no auth required)",
+      inputSchema: {
+        id: z.string().describe("Appointment ID"),
+      },
+    },
+    async ({ id }) => {
+      const data = await api.request({ path: `/appointment/public/${id}` });
+      return jsonResponse(data);
+    }
+  );
+
+  server.registerTool(
+    "undo_appointment_status",
+    {
+      description: "Undo the latest status change for an appointment",
+      inputSchema: {
+        id: z.string().describe("Appointment ID"),
+      },
+    },
+    async ({ id }) => {
+      await api.request({
+        method: "PATCH",
+        path: `/appointment/${id}/undo-latest-status`,
+      });
+      return { content: [{ type: "text" as const, text: `Undid latest status change for appointment ${id}.` }] };
+    }
+  );
+
+  server.registerTool(
+    "create_recurring_appointments",
+    {
+      description: "Create a recurring appointment series from an existing appointment",
+      inputSchema: {
+        id: z.string().describe("Original appointment ID"),
+        numWeeks: z.number().describe("Number of weeks to repeat pattern"),
+        weekDays: z.array(z.enum(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]))
+          .describe("Days of the week to create appointments"),
+        copyFields: z.array(z.enum(["refNumber", "customFields", "notes", "tags"]))
+          .describe("Fields to copy from the original appointment to the series"),
+      },
+    },
+    async ({ id, ...body }) => {
+      const data = await api.request({
+        method: "POST",
+        path: `/appointment/${id}/recurring`,
+        body,
+      });
+      return jsonResponse(data);
+    }
+  );
+
+  server.registerTool(
+    "delete_recurring_appointments",
+    {
+      description: "Delete all recurring appointments in a series (excludes the original)",
+      inputSchema: {
+        id: z.string().describe("Original appointment ID"),
+      },
+    },
+    async ({ id }) => {
+      await api.request({
+        method: "DELETE",
+        path: `/appointment/${id}/recurring`,
+      });
+      return { content: [{ type: "text" as const, text: `Deleted recurring series for appointment ${id}.` }] };
+    }
+  );
+
+  server.registerTool(
+    "add_appointment_tag",
+    {
+      description: "Add a tag to an appointment",
+      inputSchema: {
+        id: z.string().describe("Appointment ID"),
+        tag: z.string().describe("Tag to add (e.g. 'Damaged')"),
+      },
+    },
+    async ({ id, tag }) => {
+      const data = await api.request({
+        method: "POST",
+        path: `/appointment/${id}/tag`,
+        body: { tag },
+      });
+      return jsonResponse(data);
+    }
+  );
+
+  server.registerTool(
+    "remove_appointment_tag",
+    {
+      description: "Remove a tag from an appointment",
+      inputSchema: {
+        id: z.string().describe("Appointment ID"),
+        tag: z.string().describe("Tag to remove"),
+      },
+    },
+    async ({ id, tag }) => {
+      await api.request({
+        method: "DELETE",
+        path: `/appointment/${id}/tag`,
+        body: { tag },
+      });
+      return { content: [{ type: "text" as const, text: `Removed tag '${tag}' from appointment ${id}.` }] };
+    }
+  );
 }
