@@ -55,10 +55,13 @@ OPENDOCK_PASSWORD=your-password
 OPENDOCK_TOKEN=your-jwt-token
 ```
 
-Optionally set the API URL (defaults to `https://neutron.opendock.com`):
+Optionally set the API URL:
 
 ```
 OPENDOCK_API_URL=https://neutron.opendock.com           # production (default)
+```
+
+```
 OPENDOCK_API_URL=https://neutron.staging.opendock.com    # staging
 ```
 
