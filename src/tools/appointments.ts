@@ -1,28 +1,42 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ApiClient } from "../api/client.js";
+import { ApiClient, QueryParams } from "../api/client.js";
 import { jsonResponse, textResponse } from "./index.js";
+
+/**
+ * Build a NestJSX/Crud `s=` search JSON string from startDate/endDate.
+ * Filters on the appointment `start` field.
+ */
+function buildDateSearch(startDate?: string, endDate?: string): string | undefined {
+  if (!startDate && !endDate) return undefined;
+  const conditions: object[] = [];
+  if (startDate) conditions.push({ start: { $gte: `${startDate}T00:00:00.000Z` } });
+  if (endDate) conditions.push({ start: { $lte: `${endDate}T23:59:59.999Z` } });
+  return JSON.stringify(conditions.length === 1 ? conditions[0] : { $and: conditions });
+}
 
 export function registerAppointmentTools(server: McpServer, api: ApiClient) {
   server.registerTool(
     "list_appointments",
     {
-      description: "List appointments with optional filters and pagination",
+      description: "List appointments with optional filters and pagination. Uses NestJSX/Crud search syntax.",
       inputSchema: {
         page: z.number().optional().describe("Page number"),
         limit: z.number().optional().describe("Items per page"),
         warehouseId: z.string().optional().describe("Filter by warehouse ID"),
         dockId: z.string().optional().describe("Filter by dock ID"),
         status: z.string().optional().describe("Filter by status"),
-        startDate: z.string().optional().describe("Filter by start date (YYYY-MM-DD)"),
-        endDate: z.string().optional().describe("Filter by end date (YYYY-MM-DD)"),
+        startDate: z.string().optional().describe("Filter appointments starting on or after this date (YYYY-MM-DD)"),
+        endDate: z.string().optional().describe("Filter appointments starting on or before this date (YYYY-MM-DD)"),
+        s: z.string().optional().describe("Raw NestJSX/Crud search JSON (e.g. '{\"status\":\"Scheduled\",\"start\":{\"$gte\":\"2026-01-01T00:00:00.000Z\"}}')"),
       },
     },
     async (params) => {
-      const data = await api.request({
-        path: "/appointment",
-        query: params as Record<string, string | number | undefined>,
-      });
+      const { startDate, endDate, s, ...rest } = params;
+      const query: QueryParams = { ...rest };
+      // Raw s= takes precedence; otherwise build from startDate/endDate
+      query.s = s ?? buildDateSearch(startDate, endDate);
+      const data = await api.request({ path: "/appointment", query });
       return jsonResponse(data);
     }
   );

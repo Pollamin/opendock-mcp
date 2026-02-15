@@ -41,9 +41,53 @@ describe("appointment tools", () => {
     const result = await server.call("list_appointments", { page: 1, limit: 10, warehouseId: "w1" });
     expect(api.request).toHaveBeenCalledWith({
       path: "/appointment",
-      query: { page: 1, limit: 10, warehouseId: "w1" },
+      query: { page: 1, limit: 10, warehouseId: "w1", s: undefined },
     });
     expect(JSON.parse(result.content[0].text)).toEqual([{ id: "a1" }]);
+  });
+
+  it("list_appointments builds s= from startDate only", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    await server.call("list_appointments", { startDate: "2026-01-01" });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: { s: JSON.stringify({ start: { $gte: "2026-01-01T00:00:00.000Z" } }) },
+    });
+  });
+
+  it("list_appointments builds s= from endDate only", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    await server.call("list_appointments", { endDate: "2026-12-31" });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: { s: JSON.stringify({ start: { $lte: "2026-12-31T23:59:59.999Z" } }) },
+    });
+  });
+
+  it("list_appointments builds s= with $and from startDate + endDate", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    await server.call("list_appointments", { startDate: "2026-01-01", endDate: "2026-12-31" });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: {
+        s: JSON.stringify({
+          $and: [
+            { start: { $gte: "2026-01-01T00:00:00.000Z" } },
+            { start: { $lte: "2026-12-31T23:59:59.999Z" } },
+          ],
+        }),
+      },
+    });
+  });
+
+  it("list_appointments passes raw s= and ignores startDate/endDate", async () => {
+    api.request.mockResolvedValueOnce({ data: [] });
+    const raw = '{"status":"Scheduled"}';
+    await server.call("list_appointments", { s: raw, startDate: "2026-01-01" });
+    expect(api.request).toHaveBeenCalledWith({
+      path: "/appointment",
+      query: { s: raw },
+    });
   });
 
   // --- search_appointments ---
