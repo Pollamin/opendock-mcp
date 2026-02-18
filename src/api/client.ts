@@ -2,7 +2,17 @@ import { AuthManager } from "./auth.js";
 
 const REQUEST_TIMEOUT_MS = 30_000;
 const RETRY_DELAY_MS = 1_000;
+const MAX_RETRY_DELAY_MS = 60_000;
 const RETRYABLE_STATUS_CODES = new Set([502, 503, 504]);
+
+function parseRetryAfter(header: string | null): number {
+  if (!header) return RETRY_DELAY_MS;
+  const seconds = parseInt(header, 10);
+  if (!isNaN(seconds)) return Math.min(seconds * 1000, MAX_RETRY_DELAY_MS);
+  const date = new Date(header);
+  if (!isNaN(date.getTime())) return Math.min(Math.max(0, date.getTime() - Date.now()), MAX_RETRY_DELAY_MS);
+  return RETRY_DELAY_MS;
+}
 
 export type QueryParams = Record<string, string | number | boolean | string[] | undefined>;
 
@@ -28,6 +38,13 @@ export class ApiClient {
     if (response.status === 401) {
       console.error(`[opendock] Got 401 on ${opts.method || "GET"} ${opts.path}, retrying with fresh token`);
       this.auth.clearToken();
+      return this.handleResponse<T>(await this.doRequest(opts));
+    }
+
+    if (response.status === 429) {
+      const delay = parseRetryAfter(response.headers.get("Retry-After"));
+      console.error(`[opendock] Got 429 on ${opts.method || "GET"} ${opts.path}, retrying in ${delay}ms`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
       return this.handleResponse<T>(await this.doRequest(opts));
     }
 
