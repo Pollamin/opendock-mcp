@@ -31,6 +31,7 @@ if [ ! -f "$TOKEN_FILE" ]; then
 fi
 GITHUB_TOKEN="$(cat "$TOKEN_FILE" | tr -d '[:space:]')"
 
+npm login
 npm publish --access public --otp "$OTP"
 mcp-publisher login github --token $GITHUB_TOKEN
 mcp-publisher publish
