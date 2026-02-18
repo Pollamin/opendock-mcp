@@ -12,8 +12,8 @@ describe("company tools", () => {
     registerCompanyTools(server as any, api as any);
   });
 
-  it("registers all 3 company tools", () => {
-    expect(server.tools.size).toBe(3);
+  it("registers all 4 company tools", () => {
+    expect(server.tools.size).toBe(4);
   });
 
   it("list_companies sends GET /company with query params", async () => {
@@ -31,6 +31,17 @@ describe("company tools", () => {
     const result = await server.call("get_company", { id: "co1" });
     expect(api.request).toHaveBeenCalledWith({ path: "/company/co1" });
     expect(JSON.parse(result.content[0].text)).toEqual({ id: "co1", name: "ACME Logistics" });
+  });
+
+  it("update_company sends PATCH /company/:id", async () => {
+    api.request.mockResolvedValueOnce({ id: "co1", name: "Updated Name", scac: "UPDT" });
+    const result = await server.call("update_company", { id: "co1", name: "Updated Name", scac: "UPDT" });
+    expect(api.request).toHaveBeenCalledWith({
+      method: "PATCH",
+      path: "/company/co1",
+      body: { name: "Updated Name", scac: "UPDT" },
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({ id: "co1", name: "Updated Name", scac: "UPDT" });
   });
 
   it("create_company sends POST /company", async () => {

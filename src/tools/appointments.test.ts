@@ -12,8 +12,8 @@ describe("appointment tools", () => {
     registerAppointmentTools(server as any, api as any);
   });
 
-  it("registers all 12 appointment tools", () => {
-    expect(server.tools.size).toBe(12);
+  it("registers all 13 appointment tools", () => {
+    expect(server.tools.size).toBe(13);
   });
 
   // --- list_appointments ---
@@ -246,6 +246,65 @@ describe("appointment tools", () => {
       body: { tag: "Damaged" },
     });
     expect(JSON.parse(result.content[0].text)).toEqual({ id: "a1", tags: ["Damaged"] });
+  });
+
+  // --- find_and_book_appointment ---
+
+  it("find_and_book_appointment fetches slots and creates appointment", async () => {
+    const slots = [
+      { loadTypeId: "lt1", dockId: "d1", start: "2026-03-01T09:00:00Z", end: "2026-03-01T10:00:00Z" },
+      { loadTypeId: "lt2", dockId: "d2", start: "2026-03-01T11:00:00Z", end: "2026-03-01T12:00:00Z" },
+    ];
+    api.request.mockResolvedValueOnce(slots);
+    api.request.mockResolvedValueOnce({ id: "a99", status: "Scheduled" });
+
+    const result = await server.call("find_and_book_appointment", {
+      loadTypeId: "lt1",
+      warehouseId: "w1",
+    });
+
+    expect(api.request).toHaveBeenNthCalledWith(1, {
+      method: "POST",
+      path: "/metrics/loadtype/first-avail-appt",
+      body: {},
+    });
+    expect(api.request).toHaveBeenNthCalledWith(2, {
+      method: "POST",
+      path: "/appointment",
+      body: { warehouseId: "w1", dockId: "d1", loadTypeId: "lt1", startTime: "2026-03-01T09:00:00Z", endTime: "2026-03-01T10:00:00Z" },
+    });
+    expect(JSON.parse(result.content[0].text)).toEqual({ id: "a99", status: "Scheduled" });
+  });
+
+  it("find_and_book_appointment throws if no slot matches loadTypeId", async () => {
+    api.request.mockResolvedValueOnce([
+      { loadTypeId: "lt2", dockId: "d2", start: "2026-03-01T09:00:00Z", end: "2026-03-01T10:00:00Z" },
+    ]);
+    await expect(
+      server.call("find_and_book_appointment", { loadTypeId: "lt1", warehouseId: "w1" })
+    ).rejects.toThrow('No available slot found for loadTypeId "lt1"');
+  });
+
+  it("find_and_book_appointment throws if API returns non-array", async () => {
+    api.request.mockResolvedValueOnce({ unexpected: "format" });
+    await expect(
+      server.call("find_and_book_appointment", { loadTypeId: "lt1", warehouseId: "w1" })
+    ).rejects.toThrow("Unexpected response format");
+  });
+
+  it("find_and_book_appointment filters by dockId when provided", async () => {
+    const slots = [
+      { loadTypeId: "lt1", dockId: "d1", start: "2026-03-01T09:00:00Z", end: "2026-03-01T10:00:00Z" },
+      { loadTypeId: "lt1", dockId: "d2", start: "2026-03-01T11:00:00Z", end: "2026-03-01T12:00:00Z" },
+    ];
+    api.request.mockResolvedValueOnce(slots);
+    api.request.mockResolvedValueOnce({ id: "a100" });
+
+    await server.call("find_and_book_appointment", { loadTypeId: "lt1", warehouseId: "w1", dockId: "d2" });
+
+    expect(api.request).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      body: expect.objectContaining({ dockId: "d2", startTime: "2026-03-01T11:00:00Z" }),
+    }));
   });
 
   // --- remove_appointment_tag ---

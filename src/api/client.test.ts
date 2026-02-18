@@ -17,10 +17,12 @@ function jsonResponse(body: unknown, status = 200) {
   };
 }
 
-function errorResponse(status: number, body = "error") {
+function errorResponse(status: number, body = "error", headers: Record<string, string> = {}) {
+  const headerMap = new Map(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
   return {
     ok: false,
     status,
+    headers: { get: (key: string) => headerMap.get(key.toLowerCase()) ?? null },
     json: async () => ({ error: body }),
     text: async () => body,
   };
@@ -238,6 +240,59 @@ describe("ApiClient", () => {
 
     const result = await client.request({ method: "DELETE", path: "/items/1" });
     expect(result).toBeUndefined();
+  });
+
+  it("retries on 429 with default 1s delay when no Retry-After header", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn()
+        .mockResolvedValueOnce(errorResponse(429))
+        .mockResolvedValueOnce(jsonResponse({ ok: true }))
+    );
+    const client = new ApiClient("https://api.test", auth as any);
+
+    const promise = client.request({ path: "/items" });
+    await vi.advanceTimersByTimeAsync(1000);
+    const result = await promise;
+    expect(result).toEqual({ ok: true });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it("retries on 429 using Retry-After seconds header", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn()
+        .mockResolvedValueOnce(errorResponse(429, "rate limited", { "Retry-After": "5" }))
+        .mockResolvedValueOnce(jsonResponse({ ok: true }))
+    );
+    const client = new ApiClient("https://api.test", auth as any);
+
+    const promise = client.request({ path: "/items" });
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await promise;
+    expect(result).toEqual({ ok: true });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it("throws if 429 retry also fails", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn()
+        .mockResolvedValueOnce(errorResponse(429))
+        .mockResolvedValueOnce(errorResponse(429, "still rate limited"))
+    );
+    const client = new ApiClient("https://api.test", auth as any);
+
+    const promise = client.request({ path: "/items" });
+    const assertion = expect(promise).rejects.toThrow("API error 429: still rate limited");
+    await vi.advanceTimersByTimeAsync(1000);
+    await assertion;
+    vi.useRealTimers();
   });
 
   it("propagates network errors from fetch", async () => {

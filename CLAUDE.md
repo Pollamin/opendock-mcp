@@ -18,15 +18,16 @@ src/
 ├── config.ts             # Env var loading (OPENDOCK_API_URL, USERNAME, PASSWORD, TOKEN)
 ├── api/
 │   ├── auth.ts           # AuthManager: login, refresh, JWT decode (no external lib)
-│   └── client.ts         # ApiClient: fetch wrapper, auth headers, 401 auto-retry
+│   └── client.ts         # ApiClient: fetch wrapper, auth headers, 401/429/5xx retry
 └── tools/
     ├── index.ts          # registerAllTools() + get_version + get_profile tools
+    ├── prompts.ts        # 4 MCP prompts (book-appointment, daily-schedule, reschedule-appointment, carrier-performance)
     ├── warehouses.ts     # 6 tools
     ├── docks.ts          # 7 tools
     ├── loadtypes.ts      # 6 tools
-    ├── appointments.ts   # 12 tools
+    ├── appointments.ts   # 13 tools (incl. find_and_book_appointment)
     ├── carriers.ts       # 5 tools
-    ├── companies.ts      # 3 tools
+    ├── companies.ts      # 4 tools (incl. update_company)
     ├── orgs.ts           # 3 tools
     ├── audit-log.ts      # 1 tool
     ├── settings-metadata.ts # 3 tools
@@ -59,7 +60,7 @@ src/
 npm test          # vitest run — all tests
 ```
 
-- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`, `src/tools/companies.test.ts`, `src/tools/orgs.test.ts`, `src/tools/audit-log.test.ts`, `src/tools/settings-metadata.test.ts`, `src/tools/metrics.test.ts`
+- Tests are co-located: `src/config.test.ts`, `src/api/auth.test.ts`, `src/api/client.test.ts`, `src/tools/warehouses.test.ts`, `src/tools/docks.test.ts`, `src/tools/loadtypes.test.ts`, `src/tools/appointments.test.ts`, `src/tools/carriers.test.ts`, `src/tools/companies.test.ts`, `src/tools/orgs.test.ts`, `src/tools/audit-log.test.ts`, `src/tools/settings-metadata.test.ts`, `src/tools/metrics.test.ts`, `src/tools/prompts.test.ts`
 - `tsconfig.json` excludes `src/**/*.test.ts` so tests don't end up in `dist/`
 - Shared test helpers (`mockServer`, `mockApi`) live in `src/tools/test-utils.ts`
 - Mock `fetch` via `vi.stubGlobal`; use `vi.useFakeTimers()` for retry delay tests

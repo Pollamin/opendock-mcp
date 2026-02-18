@@ -272,6 +272,76 @@ SORT: Each sort is "field,direction". Use array for multi-sort.
   );
 
   server.registerTool(
+    "find_and_book_appointment",
+    {
+      description: `Find the next available slot for a load type and book it in one step.
+
+Calls the first-available-appointment endpoint to get open slots across all docks and load types, filters to the requested loadTypeId (and optionally a preferred dock), then creates the appointment automatically. Use this instead of manually chaining get_first_available_appointment + create_appointment.`,
+      inputSchema: {
+        loadTypeId: z.string().describe("Load type ID to book"),
+        warehouseId: z.string().describe("Warehouse ID"),
+        dockId: z.string().optional().describe("Preferred dock ID; if omitted, uses first available dock for this load type"),
+        carrierId: z.string().optional().describe("Carrier ID"),
+        referenceNumber: z.string().optional().describe("Reference number"),
+        notes: z.string().optional().describe("Appointment notes"),
+      },
+    },
+    async ({ loadTypeId, warehouseId, dockId, carrierId, referenceNumber, notes }) => {
+      const slots = await api.request<unknown>({
+        method: "POST",
+        path: "/metrics/loadtype/first-avail-appt",
+        body: {},
+      });
+
+      if (!Array.isArray(slots)) {
+        throw new Error(
+          "Unexpected response format from first-available-appointment endpoint. " +
+          "Use get_first_available_appointment to inspect available slots directly."
+        );
+      }
+
+      const slot = slots.find(
+        (s: any) => s.loadTypeId === loadTypeId && (!dockId || s.dockId === dockId)
+      ) as any;
+
+      if (!slot) {
+        throw new Error(
+          `No available slot found for loadTypeId "${loadTypeId}"` +
+          (dockId ? ` on dock "${dockId}"` : "") +
+          ". Use get_first_available_appointment to see all available slots."
+        );
+      }
+
+      const startTime: string | undefined = slot.start ?? slot.startTime;
+      const endTime: string | undefined = slot.end ?? slot.endTime;
+      const resolvedDockId: string = slot.dockId ?? dockId;
+
+      if (!startTime || !endTime || !resolvedDockId) {
+        throw new Error(
+          "Available slot is missing required fields (dockId, start, end). " +
+          "Use get_first_available_appointment to inspect the slot format."
+        );
+      }
+
+      const appointment = await api.request({
+        method: "POST",
+        path: "/appointment",
+        body: {
+          warehouseId,
+          dockId: resolvedDockId,
+          loadTypeId,
+          startTime,
+          endTime,
+          ...(carrierId && { carrierId }),
+          ...(referenceNumber && { referenceNumber }),
+          ...(notes && { notes }),
+        },
+      });
+      return jsonResponse(appointment);
+    }
+  );
+
+  server.registerTool(
     "remove_appointment_tag",
     {
       description: "Remove a tag from an appointment",
